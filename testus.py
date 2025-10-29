@@ -1,8 +1,4 @@
-from inspect import signature, getframeinfo, stack, getouterframes, currentframe
-import inspect
-import sys
-import traceback
-import types
+from inspect import signature, getframeinfo, stack
 import time
 
 _tests: list[tuple[callable, signature]] = []
