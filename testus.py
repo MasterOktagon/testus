@@ -51,9 +51,8 @@ class Section:
         del _in_section[-1]
 
 class Benchmark(Section):
-    def __init__(self, name: str="", limit: float=0):
+    def __init__(self, name: str=""):
         super().__init__("")
-        self.limit = limit
         if name != "":
             self.name = "::" + name
 
@@ -66,9 +65,6 @@ class Benchmark(Section):
         super().__exit__(*args)
         time_diff = time.process_time() - self.__timer_start
         _benchmarks.append((self.name, time_diff, _in_section.copy()))
-        #if time_diff > limit:
-        #    caller = getframeinfo(stack()[1][0])
-        #    raise _test_slow(str(caller.code_context[0]), _in_section.copy(), int(caller.lineno), caller.filename, self.limit, time_diff)
 
 def trace(expr: any):
     code = getframeinfo(stack()[1][0]).code_context[0].strip()
@@ -100,7 +96,6 @@ def test(f: callable):
     if len(sign.parameters):
         raise Exception("YOU IDIOT NO PARAMS!!!")
     _tests.append((f, sign))
-
     return f
 
 def _print_trace():
@@ -163,8 +158,7 @@ def _exec_tests():
             _generator_idx = 0
 
             if _generator_data == []:
-                break
-        
+                break        
         if _generator_data != []:
             _exec_test(test)
 
