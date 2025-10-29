@@ -52,7 +52,7 @@ class Section:
 
 class Benchmark(Section):
     def __init__(self, name: str="", limit: float=0):
-        self.name = ""
+        super().__init__("")
         self.limit = limit
         if name != "":
             self.name = "::" + name
@@ -106,8 +106,8 @@ def test(f: callable):
 def _print_trace():
     if len(_trace) > 0:
         print()
-    for t in _trace:
-        print(f"  with \033[1m{t}={_trace[t]}\033[0m")
+        for t in _trace:
+            print(f"  with \033[1m{t}={_trace[t]}\033[0m")
 
 def _exec_test(test: tuple[callable, signature]):
     global _successes, _fails, _benchmarks, _generator_idx, _generator_data, _generating
@@ -159,7 +159,7 @@ def _exec_tests():
             _trace = {}
             if _generating:
                 _generating = False
-                _generator_data[-1] -= 1
+                if len(_generator_data): _generator_data[-1] -= 1
             _generator_idx = 0
 
             if _generator_data == []:
@@ -193,7 +193,7 @@ def _print_result():
     total = _fails + _successes
     print("\n\033[32;1m[TEST RESULTS]\033[0m")
     if total == 0:
-        print(f"\033[32mNo tests ran\033[0m")
+        print("\033[32mNo tests ran\033[0m")
         print("[\033[33m" + "="*50 + "\033[0m]")
     else:
         print(f"\033[32m🗸\033[0m Passed: {_successes}/{total}")
