@@ -94,13 +94,15 @@ def _print_trace():
         for t in _trace:
             print(f"  with \033[1m{t}={_trace[t]}\033[0m")
 
-def _exec_test(test: tuple[callable, signature]):
+def _exec_test(test: tuple[callable, signature], number: int = 0):
     global _successes, _fails, _benchmarks, _generator_idx, _generator_data, _generating
     try:
+        s = "" if number == 1 else f" [{number}]"
+        print(f"\033[1K\rrunning: {test[0].__name__}{s} ...", end="")
         test[0]()
         _successes += 1
     except _test_fail as e:
-        print(f"\033[31;1mTEST FAILED: {test[0].__name__.replace('_', ' ').strip()}\033[0m \033[31m({e.filename})\033[0m")
+        print(f"\033[1K\r\033[31;1mTEST FAILED: {test[0].__name__.replace('_', ' ').strip()}\033[0m \033[31m({e.filename})\033[0m")
         if e.sec_cache:
             for ind, i in enumerate(e.sec_cache):
                 if i == "": continue
@@ -110,7 +112,7 @@ def _exec_test(test: tuple[callable, signature]):
         _fails += 1
 
     except _catch_fail as e:
-        print(f"\033[31;1mTEST FAILED: {test[0].__name__.replace('_', ' ').strip()}\033[0m \033[31m({e.filename})\033[0m")
+        print(f"\033[1K\r\033[31;1mTEST FAILED: {test[0].__name__.replace('_', ' ').strip()}\033[0m \033[31m({e.filename})\033[0m")
         if e.sec_cache:
             for ind, i in enumerate(e.sec_cache):
                 if i == "": continue
@@ -124,13 +126,15 @@ def _exec_test(test: tuple[callable, signature]):
 
     finally:
         for name, bm_time, section in _benchmarks:
-            print(f"[Benchmark \033[1m{test[0].__name__ + '::'*int(len(section) > 0) + '::'.join(section) + name}\033[0m required {round(bm_time, 6)}s]")
+            print(f"\033[1K\r[Benchmark \033[1m{test[0].__name__ + '::'*int(len(section) > 0) + '::'.join(section) + name}\033[0m required {round(bm_time, 6)}s]")
             _print_trace()
 def _exec_tests():
     global _successes, _fails, _benchmarks, _generator_idx, _generator_data, _generating
     for test in _tests:
+        number = 1
         while _generator_data != [0]*len(_generator_data) or _generator_data == []:
-            _exec_test(test)
+            _exec_test(test,number)
+            number += 1
             
             _benchmarks = []
             _trace = {}
@@ -142,7 +146,7 @@ def _exec_tests():
             if _generator_data == []:
                 break        
         if _generator_data != []:
-            _exec_test(test)
+            _exec_test(test, number)
 
         _generator_idx = 0
         _generator_data = []
@@ -167,7 +171,7 @@ def catch(expr: callable, exc: type=Exception):
 
 def _print_result():
     total = _fails + _successes
-    print("\n\033[32;1m[TEST RESULTS]\033[0m")
+    print("\033[1K\n\033[32;1m[TEST RESULTS]\033[0m")
     if total == 0:
         print("\033[32mNo tests ran\033[0m")
         print("[\033[33m" + "="*50 + "\033[0m]")
