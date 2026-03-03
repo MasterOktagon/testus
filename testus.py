@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from inspect import signature, getframeinfo, stack
 import time
 
@@ -28,17 +29,6 @@ class _catch_fail(BaseException):
         self.filename = filename
         self.errname = errname
         self.errname_real = errname_real
-
-class _test_slow(BaseException):
-    def __init__(self, stringus: str, sec_cache: list[str], lineno: int, filename: str, limit: float, time_diff: float):
-        super().__init__()
-        self.stringus = stringus
-        self.sec_cache = sec_cache
-        self.lineno = lineno
-        self.filename = filename
-        self.limit = limit
-        self.time_diff = time_diff
-
 
 class Section:
     def __init__(self, name: str):
@@ -119,14 +109,6 @@ def _exec_test(test: tuple[callable, signature]):
         print("\nassertion \033[1m" + e.stringus.strip() + "\033[0m failed at line " + str(e.lineno) + "\n")
         _fails += 1
 
-    except _test_slow as e:
-        print(f"\033[31;1mTEST FAILED: {test[0].__name__.replace('_', ' ').strip()}\033[0m \033[31m({e.filename})\033[0m")
-        if e.sec_cache:
-            for ind, i in enumerate(e.sec_cache):
-                if i == "": continue
-                print("  " * (ind+1) + f"in section {i}")
-        print("\nbenchmark \033[1m" + e.stringus.strip() + "\033[0m at line " + str(e.lineno) + f" was slow: {e.time_diff}s/{e.limit}s\n")
-
     except _catch_fail as e:
         print(f"\033[31;1mTEST FAILED: {test[0].__name__.replace('_', ' ').strip()}\033[0m \033[31m({e.filename})\033[0m")
         if e.sec_cache:
@@ -143,7 +125,7 @@ def _exec_test(test: tuple[callable, signature]):
     finally:
         for name, bm_time, section in _benchmarks:
             print(f"[Benchmark \033[1m{test[0].__name__ + '::'*int(len(section) > 0) + '::'.join(section) + name}\033[0m required {round(bm_time, 6)}s]")
-
+            _print_trace()
 def _exec_tests():
     global _successes, _fails, _benchmarks, _generator_idx, _generator_data, _generating
     for test in _tests:
@@ -198,3 +180,9 @@ def _print_result():
 def run_tests():
     _exec_tests()
     _print_result()
+
+
+
+if __name__ == "__main__":
+    pass
+    # run_tests()
